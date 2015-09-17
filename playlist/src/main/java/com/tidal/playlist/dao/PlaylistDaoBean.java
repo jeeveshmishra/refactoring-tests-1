@@ -30,17 +30,27 @@ public class PlaylistDaoBean {
 
         trackPlayList.setDeleted(false);
         trackPlayList.setDescription("The mother of all playlists");
-        trackPlayList.setDuration((float) (60 * 60 * 2));
+        trackPlayList.setDuration((float) 0);
         trackPlayList.setId(49834);
         trackPlayList.setLastUpdated(new Date());
         trackPlayList.setNrOfTracks(376);
         trackPlayList.setPlayListName("Collection of great songs");
-        trackPlayList.setPlayListTracks(getPlaylistTracks());
+        Set<PlayListTrack> playListTracks = getPlaylistTracks();
+        trackPlayList.setDuration(calculateDurationForTrackPlayList(playListTracks));
+        trackPlayList.setPlayListTracks(playListTracks);
         trackPlayList.setUserId(userId);
         trackPlayList.setSharingLevel(SharingLevel.PUBLIC);
         trackPlayList.setUuid(uuid);
 
         return trackPlayList;
+    }
+
+    public static float calculateDurationForTrackPlayList(Set<PlayListTrack> playListTracks) {
+        float tempDuration = 0;
+        for(PlayListTrack playListTrack:playListTracks){
+            tempDuration = tempDuration + playListTrack.getTrack().getDuration();
+        }
+        return tempDuration;
     }
 
     private static Set<PlayListTrack> getPlaylistTracks() {
@@ -49,11 +59,12 @@ public class PlaylistDaoBean {
         for (int i = 0; i < 376; i++) {
             PlayListTrack playListTrack = new PlayListTrack();
             playListTrack.setDateAdded(new Date());
-            playListTrack.setDescription("A description");
+            playListTrack.setDescription("A description" + (i+1));
             playListTrack.setId(i + 1);
             playListTrack.setIndex(i);
             playListTrack.setSharingLevel(SharingLevel.PUBLIC);
             playListTrack.setTrack(getTrack());
+            playListTracks.add(playListTrack);
 
         }
 
