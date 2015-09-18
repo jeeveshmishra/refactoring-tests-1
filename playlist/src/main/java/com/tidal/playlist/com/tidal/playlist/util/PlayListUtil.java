@@ -109,13 +109,14 @@ public class PlayListUtil {
      * @param playList
      * @param refreshedPlayListTracks
      */
-    public void refreshPlayList(TrackPlayList playList, List<PlayListTrack> refreshedPlayListTracks) {
+    public TrackPlayList refreshPlayList(TrackPlayList playList, List<PlayListTrack> refreshedPlayListTracks) {
         playList.getPlayListTracks().clear();
         for(PlayListTrack playListTrack : refreshedPlayListTracks){
             playList.addPlayListTrack(playListTrack);
         }
         //playList.getPlayListTracks().addAll(refreshedPlayListTracks);
         playList.setNrOfTracks(refreshedPlayListTracks.size());
+        return playList;
     }
 
 }

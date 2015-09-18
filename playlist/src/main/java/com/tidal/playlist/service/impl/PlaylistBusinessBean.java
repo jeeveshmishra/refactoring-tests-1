@@ -32,7 +32,8 @@ public class PlaylistBusinessBean implements PlaylistBusinessIntf {
 
     }
 
-    public List<PlayListTrack> addTracks(String uuid, int userId, List<Track> tracksToAdd, int toIndex,
+    public TrackPlayList addTracks(String uuid, int userId, List<Track> tracksToAdd,
+                                         int toIndex,
                                   Date lastUpdated) throws PlaylistException {
 
         try {
@@ -53,7 +54,7 @@ public class PlaylistBusinessBean implements PlaylistBusinessIntf {
 
             // In My View this is already take care in alignIndex Method.
             if (!validations.validateIndexes(toIndex, currentTracksCount)) {
-                return Collections.EMPTY_LIST;
+                return playList;
             }
 
             Set<PlayListTrack> originalSet = playList.getPlayListTracks();
@@ -68,19 +69,19 @@ public class PlaylistBusinessBean implements PlaylistBusinessIntf {
                     playListUtil.getFreshlyMergedAndIndexedPlayListTracks(tracksToAdd, toIndex, lastUpdated,
                             playList, original);
             //refresh playlist.
-            playListUtil.refreshPlayList(playList, refreshedPlayListTracks);
+            playList = playListUtil.refreshPlayList(playList, refreshedPlayListTracks);
 
-            return refreshedPlayListTracks;
+            return playList;
 
         } catch (Exception e) {
             e.printStackTrace();
-            throw new PlaylistException("Generic error");
+            throw new PlaylistException(e.getMessage());
         }
     }
 
 
 
-    public List<PlayListTrack> removeTracks(String uuid, int userId, List<Track> tracksToDelete,
+    public TrackPlayList removeTracks(String uuid, int userId, List<Track> tracksToDelete,
                                   Date lastUpdated) throws PlaylistException {
 
         try {
@@ -111,13 +112,13 @@ public class PlaylistBusinessBean implements PlaylistBusinessIntf {
                     playListUtil.getPlayListTracksPostDeletion(tracksToDelete, lastUpdated,
                             playList, original);
 
-            playListUtil.refreshPlayList(playList, refreshedPlayListTracks);
+            playList = playListUtil.refreshPlayList(playList, refreshedPlayListTracks);
 
-            return refreshedPlayListTracks;
+            return playList;
 
         } catch (Exception e) {
             e.printStackTrace();
-            throw new PlaylistException("Generic error");
+            throw new PlaylistException(e.getMessage());
         }
     }
 
