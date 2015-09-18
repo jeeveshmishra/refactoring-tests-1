@@ -32,6 +32,16 @@ public class PlaylistBusinessBean implements PlaylistBusinessIntf {
 
     }
 
+    /**
+     * This is an implementation that will add tracks and accordingly update the TrackPlayList
+     * @param uuid
+     * @param userId
+     * @param tracksToAdd
+     * @param toIndex
+     * @param lastUpdated
+     * @return
+     * @throws PlaylistException
+     */
     public TrackPlayList addTracks(String uuid, int userId, List<Track> tracksToAdd,
                                          int toIndex,
                                   Date lastUpdated) throws PlaylistException {
@@ -80,7 +90,15 @@ public class PlaylistBusinessBean implements PlaylistBusinessIntf {
     }
 
 
-
+    /**
+     * This method implementation will delete the tracks from play list and accordingly update TrackPlayList
+     * @param uuid
+     * @param userId
+     * @param tracksToDelete
+     * @param lastUpdated
+     * @return
+     * @throws PlaylistException
+     */
     public TrackPlayList removeTracks(String uuid, int userId, List<Track> tracksToDelete,
                                   Date lastUpdated) throws PlaylistException {
 

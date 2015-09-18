@@ -14,6 +14,7 @@ import org.testng.annotations.Test;
 
 import java.util.*;
 
+import static org.testng.AssertJUnit.assertFalse;
 import static org.testng.AssertJUnit.assertTrue;
 import static org.testng.AssertJUnit.fail;
 
@@ -24,6 +25,9 @@ import static org.testng.AssertJUnit.fail;
  */
 @Guice(modules = TestBusinessModule.class)
 public class PlaylistBusinessBeanTest {
+
+    String uuid = UUID.randomUUID().toString();
+    int userId = 1;
 
     @Inject
     PlaylistBusinessBean playlistBusinessBean;
@@ -38,11 +42,16 @@ public class PlaylistBusinessBeanTest {
 
     }
 
+    /**
+     * This method tests scenario of addition of tracks to a playlist.
+     * Thus it asserts:
+     * (1) tracks count - before and after
+     * (2) play list duration - before and after
+     * @throws Exception
+     */
     @Test
     public void testAddTracks() throws Exception {
         List<Track> trackList = populateTrackList();
-        String uuid = UUID.randomUUID().toString();
-        int userId = 1;
         PlaylistDaoBean playlistDaoBean = new PlaylistDaoBean();
         //Pull the PlayList facts before addup.
         TrackPlayList trackPlayListBefore = playlistDaoBean.getPlaylistByUUID(uuid, userId);
@@ -61,28 +70,40 @@ public class PlaylistBusinessBeanTest {
 
     }
 
+    /**
+     * This method tests scenario of addition of more than 500 songs to the play list.
+     * Thus it must throw exception with proper method.
+     * @throws Exception
+     */
     @Test(expectedExceptions = PlaylistException.class)
     public void testAddTracksToOverLimit() throws Exception {
         List<Track> trackList = populateTrackListToTestException();
-        String uuid = UUID.randomUUID().toString();
-        int userId = 1;
-        PlaylistDaoBean playlistDaoBean = new PlaylistDaoBean();
         // add new tracks
         TrackPlayList trackPlayListAfterAdd = playlistBusinessBean.addTracks(uuid, userId, trackList, 5, new Date());
         fail("Playlist cannot have more than 500 tracks");
     }
 
+    /**
+     * This method tests scenario of removal of tracks from play list where
+     * no of songs to be removed > no of songs within the playlist.
+     * @throws Exception
+     */
     @Test(expectedExceptions = PlaylistException.class)
     public void testRemoveTracksBeyondLimit() throws Exception {
         List<Track> trackList = populateTrackListToTestException();
-        String uuid = UUID.randomUUID().toString();
-        int userId = 1;
-        PlaylistDaoBean playlistDaoBean = new PlaylistDaoBean();
         // remove tracks
-        TrackPlayList trackPlayListAfterAdd = playlistBusinessBean.removeTracks(uuid, userId, trackList, new Date());
+        playlistBusinessBean.removeTracks(uuid, userId, trackList, new Date());
         fail("Playlist has less tracks count than to be deleted");
     }
 
+    /**
+     * This method tests scenario of removal of tracks from play list and subsequently
+     * checks for the :
+     * (1) No. of tracks - before and after deletion (but has code for addition of tracks too
+     * because then we would know which song we added and which is deleted.)
+     * (2) Also the tracks duration subsequently - before and after deletion.
+     * @throws Exception
+     */
     @Test
     public void testRemoveTracks() throws Exception {
         List<Track> trackList = populateTrackList();
@@ -93,7 +114,6 @@ public class PlaylistBusinessBeanTest {
         TrackPlayList trackPlayListBefore = playlistDaoBean.getPlaylistByUUID(uuid, userId);
         int trackSizeBefore = trackPlayListBefore.getPlayListTracksSize();
         float durationBefore = trackPlayListBefore.getDuration();
-        int noOfTracksBefore = trackPlayListBefore.getNrOfTracks();
         // add new tracks
         TrackPlayList playListTracks = playlistBusinessBean.addTracks(uuid, userId, trackList, 5, new Date());
         //Pull the playlist facts after - But from the returned playListTracks.
@@ -103,6 +123,7 @@ public class PlaylistBusinessBeanTest {
         assertTrue(trackSizeAfterAddition > 0);
         assertTrue(trackSizeBefore <= trackSizeAfterAddition);
         assertTrue(durationBefore <= durationAfterAddition);
+
         //Now call deletion or removal
         TrackPlayList playListTracksPostDeletion = playlistBusinessBean.removeTracks(uuid, userId, trackList, new Date());
         int trackSizeAfterDeletion = playListTracksPostDeletion.getPlayListTracks().size();
@@ -111,8 +132,30 @@ public class PlaylistBusinessBeanTest {
         assertTrue(trackSizeAfterDeletion > 0);
         assertTrue(trackSizeAfterDeletion <= trackSizeAfterAddition);
         assertTrue(durationAfterDeletion <= durationAfterAddition);
+        assertFalse(containsTrack(playListTracksPostDeletion.getPlayListTracks(), trackList));
     }
 
+    /**
+     * Ideally this method must be in Util class but for sake of clarity in test cases, I have kept it here.
+     * For reusability purpose, this can be moved.
+     * @param playListTracks
+     * @param trackList
+     * @return
+     */
+    private boolean containsTrack(Set<PlayListTrack> playListTracks, List<Track> trackList) {
+        boolean hasTrack = false;
+        for(PlayListTrack playListTrack:playListTracks){
+            for(Track track:trackList){
+                if((playListTrack.getTrack().equals(track))){
+                    hasTrack = true;
+                    return hasTrack;
+                } else{
+                    continue;
+                }
+            }
+        }
+        return hasTrack;
+    }
 
 
     private List<Track> populateTrackList() {
